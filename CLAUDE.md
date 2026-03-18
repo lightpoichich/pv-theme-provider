@@ -18,3 +18,4 @@ b413e1c2-8199-4468-bcf2-4f5a2dd1a16c
 
 ## No PrimeVue dependency
 This component does NOT import PrimeVue. It only injects CSS variables.
+
