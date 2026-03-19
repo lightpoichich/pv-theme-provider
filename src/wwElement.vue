@@ -12,7 +12,34 @@
 
 <script>
 import { computed, watch, onMounted, onBeforeUnmount } from 'vue';
-import { TOKEN_DEFAULTS, getTokensForSize } from '../shared/tokens.js';
+
+// Size density presets mapped to PrimeVue variables
+const SIZE_PRESETS = {
+  sm: {
+    '--p-form-field-padding-x': '0.625rem',
+    '--p-form-field-padding-y': '0.375rem',
+    '--p-button-padding-x': '0.75rem',
+    '--p-button-padding-y': '0.375rem',
+    '--p-font-size': '0.8125rem',
+    '--p-content-padding': '0.625rem',
+  },
+  md: {
+    '--p-form-field-padding-x': '0.75rem',
+    '--p-form-field-padding-y': '0.5rem',
+    '--p-button-padding-x': '1rem',
+    '--p-button-padding-y': '0.5rem',
+    '--p-font-size': '0.875rem',
+    '--p-content-padding': '0.875rem',
+  },
+  lg: {
+    '--p-form-field-padding-x': '1rem',
+    '--p-form-field-padding-y': '0.75rem',
+    '--p-button-padding-x': '1.5rem',
+    '--p-button-padding-y': '0.75rem',
+    '--p-font-size': '1rem',
+    '--p-content-padding': '1.125rem',
+  },
+};
 
 export default {
   props: {
@@ -23,55 +50,74 @@ export default {
     /* wwEditor:end */
   },
   setup(props) {
-    // Build the full set of CSS variables from content props
+    // Build PrimeVue CSS variables from editor props
     const allTokens = computed(() => {
       const c = props.content;
       const tokens = {};
 
-      // Colors — map content props to CSS variable names
-      tokens['--pv-primary'] = c?.primaryColor || TOKEN_DEFAULTS['--pv-primary'];
-      tokens['--pv-primary-hover'] = c?.primaryHoverColor || TOKEN_DEFAULTS['--pv-primary-hover'];
-      tokens['--pv-primary-light'] = c?.primaryLightColor || TOKEN_DEFAULTS['--pv-primary-light'];
-      tokens['--pv-primary-contrast'] = c?.primaryContrastColor || TOKEN_DEFAULTS['--pv-primary-contrast'];
-      tokens['--pv-danger'] = c?.dangerColor || TOKEN_DEFAULTS['--pv-danger'];
-      tokens['--pv-success'] = c?.successColor || TOKEN_DEFAULTS['--pv-success'];
-      tokens['--pv-warning'] = c?.warningColor || TOKEN_DEFAULTS['--pv-warning'];
-      tokens['--pv-neutral'] = c?.neutralColor || TOKEN_DEFAULTS['--pv-neutral'];
-      tokens['--pv-surface'] = c?.surfaceColor || TOKEN_DEFAULTS['--pv-surface'];
-      tokens['--pv-border'] = c?.borderColor || TOKEN_DEFAULTS['--pv-border'];
-      tokens['--pv-text'] = c?.textColor || TOKEN_DEFAULTS['--pv-text'];
-      tokens['--pv-text-muted'] = c?.textMutedColor || TOKEN_DEFAULTS['--pv-text-muted'];
+      // Colors — Brand
+      const primary = c?.primaryColor || '#3B82F6';
+      tokens['--p-primary-color'] = primary;
+      tokens['--p-primary-500'] = primary;
+      tokens['--p-primary-hover-color'] = c?.primaryHoverColor || '#1e40af';
+      tokens['--p-primary-700'] = c?.primaryHoverColor || '#1e40af';
+      tokens['--p-primary-100'] = c?.primaryLightColor || '#dbeafe';
+      tokens['--p-primary-50'] = c?.primaryLightColor || '#dbeafe';
+      tokens['--p-primary-contrast-color'] = c?.primaryContrastColor || '#ffffff';
+      tokens['--p-highlight-background'] = c?.primaryLightColor || '#dbeafe';
+      tokens['--p-highlight-color'] = primary;
+      tokens['--p-highlight-focus-background'] = c?.primaryLightColor || '#dbeafe';
+      tokens['--p-highlight-focus-color'] = primary;
+
+      // Colors — Semantic
+      tokens['--p-red-500'] = c?.dangerColor || '#EF4444';
+      tokens['--p-green-500'] = c?.successColor || '#22C55E';
+      tokens['--p-yellow-500'] = c?.warningColor || '#F59E0B';
+
+      // Colors — Neutral / Surface
+      tokens['--p-content-background'] = c?.surfaceColor || '#ffffff';
+      tokens['--p-content-border-color'] = c?.borderColor || '#e2e8f0';
+      tokens['--p-surface-border'] = c?.borderColor || '#e2e8f0';
+      tokens['--p-text-color'] = c?.textColor || '#0f172a';
+      tokens['--p-text-muted-color'] = c?.textMutedColor || '#94a3b8';
+
+      // Form field
+      tokens['--p-form-field-border-color'] = c?.borderColor || '#e2e8f0';
+      tokens['--p-form-field-hover-border-color'] = c?.primaryHoverColor || '#1e40af';
+      tokens['--p-form-field-focus-border-color'] = primary;
+      tokens['--p-form-field-invalid-border-color'] = c?.dangerColor || '#EF4444';
+      tokens['--p-form-field-background'] = c?.surfaceColor || '#ffffff';
+      tokens['--p-form-field-color'] = c?.textColor || '#0f172a';
+      tokens['--p-form-field-placeholder-color'] = c?.textMutedColor || '#94a3b8';
 
       // Shape
-      tokens['--pv-radius-sm'] = c?.radiusSm || TOKEN_DEFAULTS['--pv-radius-sm'];
-      tokens['--pv-radius'] = c?.radius || TOKEN_DEFAULTS['--pv-radius'];
-      tokens['--pv-radius-lg'] = c?.radiusLg || TOKEN_DEFAULTS['--pv-radius-lg'];
-      tokens['--pv-radius-full'] = c?.radiusFull || TOKEN_DEFAULTS['--pv-radius-full'];
-      tokens['--pv-transition'] = c?.transition || TOKEN_DEFAULTS['--pv-transition'];
+      tokens['--p-content-border-radius'] = c?.radius || '8px';
+      tokens['--p-form-field-border-radius'] = c?.radius || '8px';
+      tokens['--p-rounded-sm'] = c?.radiusSm || '4px';
+      tokens['--p-rounded-base'] = c?.radius || '8px';
+      tokens['--p-rounded-lg'] = c?.radiusLg || '12px';
+      tokens['--p-rounded-full'] = c?.radiusFull || '9999px';
 
       // Typography
-      tokens['--pv-font'] = c?.fontFamily || TOKEN_DEFAULTS['--pv-font'];
-      tokens['--pv-font-size-lg'] = c?.fontSizeLg || TOKEN_DEFAULTS['--pv-font-size-lg'];
+      tokens['--p-font-family'] = c?.fontFamily || 'Inter, system-ui, sans-serif';
 
       // Effects
-      tokens['--pv-shadow-sm'] = c?.shadowSm || TOKEN_DEFAULTS['--pv-shadow-sm'];
-      tokens['--pv-shadow'] = c?.shadow || TOKEN_DEFAULTS['--pv-shadow'];
-      tokens['--pv-focus-ring'] = c?.focusRingColor || TOKEN_DEFAULTS['--pv-focus-ring'];
+      tokens['--p-focus-ring-color'] = c?.focusRingColor || 'rgba(59,130,246,0.3)';
+      tokens['--p-overlay-select-shadow'] = c?.shadow || '0 4px 12px rgba(0,0,0,0.1)';
 
-      // Size density — preset or custom
+      // Transition
+      tokens['--p-transition-duration'] = c?.transition || '150ms';
+
+      // Size density
       const size = c?.size || 'md';
       if (size === 'custom') {
-        tokens['--pv-spacing'] = c?.customSpacing || '8px';
-        tokens['--pv-input-py'] = c?.customInputPy || '10px';
-        tokens['--pv-input-px'] = c?.customInputPx || '14px';
-        tokens['--pv-btn-py'] = c?.customBtnPy || '10px';
-        tokens['--pv-btn-px'] = c?.customBtnPx || '20px';
-        tokens['--pv-font-size'] = c?.customFontSize || '14px';
-        tokens['--pv-font-size-sm'] = c?.customFontSizeSm || '12px';
-        tokens['--pv-icon-size'] = c?.customIconSize || '18px';
+        tokens['--p-form-field-padding-x'] = c?.customInputPx || '14px';
+        tokens['--p-form-field-padding-y'] = c?.customInputPy || '10px';
+        tokens['--p-button-padding-x'] = c?.customBtnPx || '20px';
+        tokens['--p-button-padding-y'] = c?.customBtnPy || '10px';
+        tokens['--p-font-size'] = c?.customFontSize || '14px';
       } else {
-        const sizeTokens = getTokensForSize(size);
-        Object.assign(tokens, sizeTokens);
+        Object.assign(tokens, SIZE_PRESETS[size] || SIZE_PRESETS.md);
       }
 
       return tokens;
@@ -79,7 +125,7 @@ export default {
 
     const tokenCount = computed(() => Object.keys(allTokens.value).length);
 
-    // Track all keys ever set, so switching from custom→preset cleans up stale vars
+    // Track all keys ever set, so switching presets cleans up stale vars
     let injectedKeys = new Set();
 
     const injectTokens = () => {
